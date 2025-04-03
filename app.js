@@ -2,9 +2,7 @@ const SUPABASE_URL = "https://ywykbhqrmarptijohyvy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3eWtiaHFybWFycHRpam9oeXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NDk5NjMsImV4cCI6MjA1OTIyNTk2M30.swH8nbMUPz-Lyld0k5fomNRi3TiOGKVwsCF3Bods6WE";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let videoContainer = document.getElementById('video-feed');
-
-// Fetch and display videos
+// Fetch and Display Videos
 async function fetchVideos() {
   try {
     const { data, error } = await supabase.storage.from('videos').list();
@@ -14,15 +12,18 @@ async function fetchVideos() {
       return;
     }
 
-    // Clear the current video feed
+    const videoContainer = document.getElementById("video-feed");
     videoContainer.innerHTML = "";
 
     data.forEach(video => {
-      const { data: videoUrlData } = supabase.storage.from('videos').getPublicUrl(video.name);
-      const videoUrl = videoUrlData.publicUrl;
+      const { publicURL, error: urlError } = supabase.storage.from('videos').getPublicUrl(video.name);
+      if (urlError) {
+        console.error("Error getting public URL:", urlError);
+        return;
+      }
 
       const videoElement = document.createElement("video");
-      videoElement.src = videoUrl;
+      videoElement.src = publicURL;
       videoElement.controls = true;
       videoElement.classList.add("video");
       videoElement.setAttribute('data-title', video.name);
