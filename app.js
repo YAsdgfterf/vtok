@@ -135,8 +135,8 @@ async function fetchVideos() {
       return;
     }
 
-    const videoContainer = document.getElementById("video-container");
-    videoContainer.innerHTML = "";
+    const videoFeed = document.getElementById("video-feed");
+    videoFeed.innerHTML = "";
 
     data.forEach(video => {
       const { data: videoUrl } = supabase.storage.from('videos').getPublicUrl(video.name);
@@ -147,7 +147,7 @@ async function fetchVideos() {
       videoElement.classList.add("video");
       videoElement.setAttribute('data-title', video.name);
 
-      videoContainer.appendChild(videoElement);
+      videoFeed.appendChild(videoElement);
     });
 
   } catch (err) {
