@@ -2,132 +2,10 @@ const SUPABASE_URL = "https://ywykbhqrmarptijohyvy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3eWtiaHFybWFycHRpam9oeXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NDk5NjMsImV4cCI6MjA1OTIyNTk2M30.swH8nbMUPz-Lyld0k5fomNRi3TiOGKVwsCF3Bods6WE";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const peerConnection = new RTCPeerConnection();
-let mediaRecorder;
-let recordedChunks = [];
-
-// Start Live Stream (WebRTC)
-function startLiveStream() {
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      document.getElementById('camera-stream').srcObject = stream;
-      stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-    })
-    .catch(error => console.error('Error accessing media devices:', error));
-}
-
-// Screen Share
-function startScreenShare() {
-  navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-    .then(stream => {
-      const videoElement = document.getElementById('camera-stream');
-      videoElement.srcObject = stream;
-      
-      mediaRecorder = new MediaRecorder(stream);
-      recordedChunks = [];
-
-      mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
-      mediaRecorder.onstop = () => uploadRecordedVideo(new Blob(recordedChunks, { type: 'video/webm' }));
-
-      mediaRecorder.start();
-    })
-    .catch(error => console.error('Error accessing screen share:', error));
-}
-
-// Search Functionality
-function searchVideos() {
-  const searchQuery = document.getElementById('search').value.toLowerCase();
-  const videos = document.querySelectorAll('.video');
-  videos.forEach(video => {
-    const videoTitle = video.getAttribute('data-title').toLowerCase();
-    video.style.display = videoTitle.includes(searchQuery) ? 'block' : 'none';
-  });
-}
-
-// Open & Close Upload Modal
-function openUploadModal() {
-  document.getElementById('upload-modal').style.display = 'block';
-}
-
-function closeUploadModal() {
-  document.getElementById('upload-modal').style.display = 'none';
-}
-
-// Upload Video to Supabase
-async function uploadVideo() {
-  const fileInput = document.getElementById('upload-input');
-  const file = fileInput.files[0];
-
-  if (!file) {
-    console.error("No file selected.");
-    return;
-  }
-
-  const fileName = `${Date.now()}-${file.name}`;
-
+// Fetch a random video from Supabase and display it in an iframe
+async function displayRandomVideo() {
   try {
-    const { data, error } = await supabase.storage.from('videos').upload(fileName, file);
-
-    if (error) {
-      console.error("Upload error:", error);
-      return;
-    }
-
-    console.log("Uploaded successfully:", data);
-    alert("Video uploaded!");
-
-    // Refresh video list
-    fetchVideos();
-  } catch (err) {
-    console.error("Error uploading file:", err);
-  }
-
-  closeUploadModal();
-}
-
-// Start Recording and Upload to Supabase
-function startRecording() {
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      const videoElement = document.getElementById('camera-stream');
-      videoElement.srcObject = stream;
-
-      mediaRecorder = new MediaRecorder(stream);
-      recordedChunks = [];
-
-      mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
-      mediaRecorder.onstop = () => uploadRecordedVideo(new Blob(recordedChunks, { type: 'video/webm' }));
-
-      mediaRecorder.start();
-    })
-    .catch(error => console.error('Error accessing media devices:', error));
-}
-
-// Upload Recorded Video to Supabase
-async function uploadRecordedVideo(blob) {
-  const file = new File([blob], `recorded-${Date.now()}.webm`, { type: "video/webm" });
-  const fileName = `recorded-${Date.now()}.webm`;
-
-  try {
-    const { data, error } = await supabase.storage.from("videos").upload(fileName, file);
-
-    if (error) {
-      console.error("Upload error:", error);
-      return;
-    }
-
-    console.log("Recorded video uploaded:", data);
-    alert("Recording uploaded!");
-
-    fetchVideos();
-  } catch (err) {
-    console.error("Error uploading recorded video:", err);
-  }
-}
-
-// Fetch and Display Videos from Supabase
-async function fetchVideos() {
-  try {
+    // Fetch all videos from Supabase
     const { data, error } = await supabase.storage.from('videos').list();
 
     if (error) {
@@ -135,25 +13,32 @@ async function fetchVideos() {
       return;
     }
 
-    const videoFeed = document.getElementById("video-feed");
-    videoFeed.innerHTML = "";
+    // Select a random video from the list
+    const randomVideo = data[Math.floor(Math.random() * data.length)];
 
-    data.forEach(video => {
-      const { data: videoUrl } = supabase.storage.from('videos').getPublicUrl(video.name);
+    // Get the public URL for the selected video
+    const { data: videoUrlData } = supabase.storage.from('videos').getPublicUrl(randomVideo.name);
+    const videoUrl = videoUrlData.publicUrl;
 
-      const videoElement = document.createElement("video");
-      videoElement.src = videoUrl.publicUrl;
-      videoElement.controls = true;
-      videoElement.classList.add("video");
-      videoElement.setAttribute('data-title', video.name);
+    // Embed the video in an iframe
+    const iframe = document.createElement("iframe");
+    iframe.src = videoUrl;
+    iframe.frameBorder = "0";
+    iframe.allow = "autoplay; fullscreen";
+    iframe.id = "video-iframe";
 
-      videoFeed.appendChild(videoElement);
-    });
+    // Append the iframe to the body
+    document.body.innerHTML = ""; // Clear the body to make space for the iframe
+    document.body.appendChild(iframe);
+
+    // Make the iframe take up the whole screen using CSS
+    document.getElementById('video-iframe').style.width = "100%";
+    document.getElementById('video-iframe').style.height = "100vh"; // Fullscreen height
 
   } catch (err) {
-    console.error("Error fetching videos:", err);
+    console.error("Error fetching random video:", err);
   }
 }
 
-// Load Videos on Page Load
-document.addEventListener("DOMContentLoaded", fetchVideos);
+// Load a random video when the page loads
+document.addEventListener("DOMContentLoaded", displayRandomVideo);
