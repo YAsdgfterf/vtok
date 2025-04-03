@@ -2,10 +2,11 @@ const SUPABASE_URL = "https://ywykbhqrmarptijohyvy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3eWtiaHFybWFycHRpam9oeXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NDk5NjMsImV4cCI6MjA1OTIyNTk2M30.swH8nbMUPz-Lyld0k5fomNRi3TiOGKVwsCF3Bods6WE";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Fetch a random video from Supabase and display it in an iframe
-async function displayRandomVideo() {
+let videoContainer = document.getElementById('video-feed');
+
+// Fetch and display videos after upload
+async function fetchVideos() {
   try {
-    // Fetch all videos from Supabase
     const { data, error } = await supabase.storage.from('videos').list();
 
     if (error) {
@@ -13,32 +14,76 @@ async function displayRandomVideo() {
       return;
     }
 
-    // Select a random video from the list
-    const randomVideo = data[Math.floor(Math.random() * data.length)];
+    // Clear the current video feed
+    videoContainer.innerHTML = "";
 
-    // Get the public URL for the selected video
-    const { data: videoUrlData } = supabase.storage.from('videos').getPublicUrl(randomVideo.name);
-    const videoUrl = videoUrlData.publicUrl;
+    data.forEach(video => {
+      const { data: videoUrlData } = supabase.storage.from('videos').getPublicUrl(video.name);
+      const videoUrl = videoUrlData.publicUrl;
 
-    // Embed the video in an iframe
-    const iframe = document.createElement("iframe");
-    iframe.src = videoUrl;
-    iframe.frameBorder = "0";
-    iframe.allow = "autoplay; fullscreen";
-    iframe.id = "video-iframe";
+      const videoElement = document.createElement("video");
+      videoElement.src = videoUrl;
+      videoElement.controls = true;
+      videoElement.classList.add("video");
+      videoElement.setAttribute('data-title', video.name);
 
-    // Append the iframe to the body
-    document.body.innerHTML = ""; // Clear the body to make space for the iframe
-    document.body.appendChild(iframe);
-
-    // Make the iframe take up the whole screen using CSS
-    document.getElementById('video-iframe').style.width = "100%";
-    document.getElementById('video-iframe').style.height = "100vh"; // Fullscreen height
-
+      videoContainer.appendChild(videoElement);
+    });
   } catch (err) {
-    console.error("Error fetching random video:", err);
+    console.error("Error fetching videos:", err);
   }
 }
 
-// Load a random video when the page loads
-document.addEventListener("DOMContentLoaded", displayRandomVideo);
+// Upload Video and Show it After Uploading
+async function uploadVideo() {
+  const fileInput = document.getElementById('upload-input');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    console.error("No file selected.");
+    return;
+  }
+
+  const fileName = `${Date.now()}-${file.name}`;
+
+  try {
+    const { data, error } = await supabase.storage.from('videos').upload(fileName, file);
+
+    if (error) {
+      console.error("Upload error:", error);
+      return;
+    }
+
+    console.log("Uploaded successfully:", data);
+    alert("Video uploaded!");
+
+    // Immediately fetch and display the uploaded video
+    fetchVideos();
+  } catch (err) {
+    console.error("Error uploading file:", err);
+  }
+
+  closeUploadModal();
+}
+
+// Open & Close Upload Modal
+function openUploadModal() {
+  document.getElementById('upload-modal').style.display = 'block';
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').style.display = 'none';
+}
+
+// Search Functionality
+function searchVideos() {
+  const searchQuery = document.getElementById('search').value.toLowerCase();
+  const videos = document.querySelectorAll('.video');
+  videos.forEach(video => {
+    const videoTitle = video.getAttribute('data-title').toLowerCase();
+    video.style.display = videoTitle.includes(searchQuery) ? 'block' : 'none';
+  });
+}
+
+// Load Videos on Page Load
+document.addEventListener("DOMContentLoaded", fetchVideos);
