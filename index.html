@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My TikTok Clone</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Search Bar -->
+  <header>
+    <input type="text" id="search" placeholder="Search videos..." onkeyup="searchVideos()">
+  </header>
+
+  <!-- Video Feed -->
+  <div id="video-feed">
+    <div class="video" id="video1">
+      <video src="video1.mp4" controls></video>
+    </div>
+    <div class="video" id="video2">
+      <video src="video2.mp4" controls></video>
+    </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div id="upload-section">
+    <button onclick="openUploadModal()">Upload Video</button>
+  </div>
+
+  <!-- Camera Record Section -->
+  <div id="record-section">
+    <button onclick="startRecording()">Record Video</button>
+    <video id="camera-stream" autoplay></video>
+  </div>
+
+  <!-- Upload Modal -->
+  <div id="upload-modal" style="display:none;">
+    <h2>Upload Your Video</h2>
+    <input type="file" id="upload-input">
+    <button onclick="uploadVideo()">Upload</button>
+    <button onclick="closeUploadModal()">Close</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
