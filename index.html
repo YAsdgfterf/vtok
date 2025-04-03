@@ -9,28 +9,23 @@
 </head>
 <body>
 
-  <!-- Floating Record Button -->
-  <button id="record-button" onclick="toggleRecordOptions()">+</button>
-
-  <!-- Record Options Menu -->
-  <div id="record-options">
-    <button onclick="startRecording()">🎥 Record</button>
-    <button onclick="startScreenShare()">📺 Screen Share</button>
-    <button onclick="openUploadModal()">⬆️ Upload Video</button>
-  </div>
-
   <!-- Search Bar -->
   <header>
     <input type="text" id="search" placeholder="Search videos..." onkeyup="searchVideos()">
   </header>
 
   <!-- Video Feed -->
-  <div id="video-feed">
-    <!-- Videos will be dynamically loaded from Supabase -->
+  <div id="video-feed" class="video-container">
+    <!-- Videos will be dynamically loaded here -->
+  </div>
+
+  <!-- Upload Section -->
+  <div id="upload-section">
+    <button onclick="openUploadModal()">Upload Video</button>
   </div>
 
   <!-- Upload Modal -->
-  <div id="upload-modal">
+  <div id="upload-modal" style="display:none;">
     <h2>Upload Your Video</h2>
     <input type="file" id="upload-input">
     <button onclick="uploadVideo()">Upload</button>
