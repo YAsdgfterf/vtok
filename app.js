@@ -1,3 +1,37 @@
+const peerConnection = new RTCPeerConnection();
+
+function startLiveStream() {
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      document.getElementById('camera-stream').srcObject = stream;
+      stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+    })
+    .catch(error => console.error('Error accessing media devices:', error));
+}
+
+// In a real application, you'd signal this stream to a remote user via WebRTC servers.
+
+function startScreenShare() {
+  navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+    .then(stream => {
+      const videoElement = document.getElementById('camera-stream');
+      videoElement.srcObject = stream;
+      
+      mediaRecorder = new MediaRecorder(stream);
+      recordedChunks = [];
+      
+      mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        console.log('Screen share recorded:', url);
+      };
+
+      mediaRecorder.start();
+    })
+    .catch(error => console.error('Error accessing screen share:', error));
+}
+
 // Search Functionality
 function searchVideos() {
   const searchQuery = document.getElementById('search').value.toLowerCase();
