@@ -1,0 +1,50 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #333;
+  padding: 10px;
+}
+
+header input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+#video-feed {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px;
+}
+
+.video {
+  margin: 10px;
+}
+
+button {
+  padding: 10px;
+  margin: 10px;
+  background-color: #00bfff;
+  border: none;
+  color: white;
+}
+
+#record-section video {
+  width: 300px;
+  height: 200px;
+}
+
+#upload-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
