@@ -4,7 +4,7 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let videoContainer = document.getElementById('video-feed');
 
-// Fetch and display videos after upload
+// Fetch and display videos
 async function fetchVideos() {
   try {
     const { data, error } = await supabase.storage.from('videos').list();
