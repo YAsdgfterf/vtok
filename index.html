@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My TikTok Clone</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
+
   <!-- Search Bar -->
   <header>
     <input type="text" id="search" placeholder="Search videos..." onkeyup="searchVideos()">
@@ -14,12 +16,7 @@
 
   <!-- Video Feed -->
   <div id="video-feed">
-    <div class="video" id="video1">
-      <video src="video1.mp4" controls></video>
-    </div>
-    <div class="video" id="video2">
-      <video src="video2.mp4" controls></video>
-    </div>
+    <!-- Videos will be dynamically loaded here -->
   </div>
 
   <!-- Upload Section -->
